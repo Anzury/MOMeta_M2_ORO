@@ -1,8 +1,8 @@
 include("neighborhoods.jl")
 
-function getNonTabuSwapMoves(ins, sol, TM, TL, bestValue; firstobj=true)
+function getNonTabuSwapMoves(ins, sol, TM, bestValue; firstobj=true)
   id, iter, maxIter = 0, 0, 100
-  lvl1 = [j for j in 1:ins.nLvl1 if sum(sol.x[:,j]) > 0]
+  lvl1 = [j for j in 1:ins.nLvl1 if isconnected(sol.x[:,j])]
 
   while iter < maxIter && length(lvl1) > 0
     j1, j2 = rand(lvl1), rand(lvl1)
@@ -20,9 +20,9 @@ function getNonTabuSwapMoves(ins, sol, TM, TL, bestValue; firstobj=true)
   return (id, 1, 1)
 end
 
-function getNonTabuShiftMoves(ins, sol, TM, TL, bestValue; firstobj=true)
+function getNonTabuShiftMoves(ins, sol, TM, bestValue; firstobj=true)
   id, iter, maxIter = 1, 0, 100
-  lvl1 = [j for j in 1:ins.nLvl1 if sum(sol.x[:,j]) > 0]
+  lvl1 = [j for j in 1:ins.nLvl1 if isconnected(sol.x[:,j])]
 
   while iter < maxIter && length(lvl1) > 0
     i = -1
@@ -55,9 +55,9 @@ function getNonTabuShiftMoves(ins, sol, TM, TL, bestValue; firstobj=true)
   return (id, 1, 1, 1)
 end
 
-function getNonTabuDropMoves(ins, sol, TM, TL, bestValue; firstobj=true)
+function getNonTabuDropMoves(ins, sol, TM, bestValue; firstobj=true)
   id, iter, maxIter = 2, 0, 100
-  lvl1 = [j for j in 1:ins.nLvl1 if sum(sol.x[:,j]) > 0]
+  lvl1 = [j for j in 1:ins.nLvl1 if isconnected(sol.x[:,j])]
 
   while iter < maxIter && length(lvl1) > 0
     j = rand(lvl1)
@@ -75,9 +75,9 @@ function getNonTabuDropMoves(ins, sol, TM, TL, bestValue; firstobj=true)
   return (id, 1)
 end
 
-function getNonTabuOpenLvl1Moves(ins, sol, TM, TL, bestValue; firstobj=true)
+function getNonTabuOpenLvl1Moves(ins, sol, TM, bestValue; firstobj=true)
   id, iter, maxIter = 3, 0, 100
-  lvl1 = [j for j in 1:ins.nLvl1 if sum(sol.x[:,j]) == 0]
+  lvl1 = [j for j in 1:ins.nLvl1 if !isconnected(sol.x[:,j])]
 
   while iter < maxIter && length(lvl1) > 0
     j = rand(lvl1)

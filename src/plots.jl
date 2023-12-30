@@ -43,6 +43,9 @@ function plotSolution(s::SolutionSet, r=1)
 
   z = (Int(s.YN[r][1]), Int(s.YN[r][2]))
   p = plot(title=string(z), legend=false, showaxis=false)
+  if isempty(s.solutions)
+    return p
+  end
   
   lvl1term = [[], []]
   for i=1:I

@@ -80,16 +80,20 @@ function GRASP(ins::Instance, g::Function; α::Float64=0.7, p::Float64=0.4)
   for i in 1:ins.nTerm
     # we select the two closest lvl1 concentrators to terminal i
     D = [ins.C[i,j] for j in lvl1]
+    lD = length(D)
     j1, j2, d1, d2 = -1, -1, typemax(Int64), typemax(Int64)
-    for k=1:length(D)
+    for k=1:lD
       if D[k] < d1
         j1, d1 = k, D[k]
       end
     end
-    for k=1:length(D)
+    for k=1:lD
       if D[k] < d2 && k != j1
         j2, d2 = lvl1[k], D[k]
       end
+    end
+    if j1 == -1 || j2 == -1
+      continue
     end
     j1 = lvl1[j1]
 
@@ -114,7 +118,7 @@ function GRASP(ins::Instance, g::Function; α::Float64=0.7, p::Float64=0.4)
 end
 
 # Create a population of size popSize using GRASP
-function createPopulationGRASP(path::String, popSize::Int64; α::Float64=0.7)
+function createPopulationGRASP(path::String, popSize::Int64; α::Float64=0.7, p::Float64=0.4)
   # Load instance
   ins::Instance = loadInstance(path)
 
@@ -126,13 +130,13 @@ function createPopulationGRASP(path::String, popSize::Int64; α::Float64=0.7)
   # Create population
   halfpop = Int(ceil(popSize/2))
   for _ in 1:halfpop # create popSize/2 solutions with g1
-    x, y, z = GRASP(ins, g1, α=α)
+    x, y, z = GRASP(ins, g1, α=α, p=p)
     z1, z2 = getZ1(ins, x, y, z), getZ2(ins, x)
     push!(population, Solution(x, y, z, z1, z2))
   end
 
   for _ in halfpop+1:popSize # create popSize/2 solutions with g2
-    x, y, z = GRASP(ins, g2, α=α)
+    x, y, z = GRASP(ins, g2, α=α, p=p)
     z1, z2 = getZ1(ins, x, y, z), getZ2(ins, x)
     push!(population, Solution(x, y, z, z1, z2))
   end

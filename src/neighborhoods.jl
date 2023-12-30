@@ -38,14 +38,14 @@ function shift(ins::Instance, sol::Solution, i::Int64, start_j::Int64, target_j:
   if sum(nx[:, start_j]) == 1
     for k in 1:ins.nLvl2
       ny[start_j, k] = 0
-      if sum(ny[:, k]) == 0
+      if !isconnected(ny[:, k])
         nz[k] = 0
       end
     end
   end
 
   # is the target concentrator already connected to lvl2 concentrator ?
-  target_opened = sum(ny[target_j, :]) > 0
+  target_opened = isconnected(ny[target_j, :])
 
   # make shift
   nx[i, start_j] = 0
@@ -88,11 +88,11 @@ function drop(ins::Instance, sol::Solution, j1::Int64)
   end
 
   # check if there was a lvl2 connected to j1
-  if sum(ny[j1, :]) > 0
+  if isconnected(ny[j1, :])
     # if so then we close the lvl2 concentrators connected to j1
     for k in 1:ins.nLvl2
       ny[j1, k] = 0
-      if sum(ny[:, k]) == 0
+      if !isconnected(ny[:, k])
         nz[k] = 0
       end
     end
@@ -111,7 +111,7 @@ function drop(ins::Instance, sol::Solution, j1::Int64)
 
     # if lvl1 connector is not connected to lvl2 concentrator then we connect
     # it to the closest lvl2 concentrator
-    if sum(ny[target_j, :]) == 0
+    if !isconnected(ny[target_j, :])
       d, target_k = typemax(Int64), -1
       for k in 1:ins.nLvl2
         if ins.B[target_j, k] < d
@@ -137,7 +137,7 @@ function openLvl1(ins::Instance, sol::Solution, j1::Int64)
   nz::Array{Int64, 1} = copy(sol.z)
 
   candidate_terms = []
-  terms = [i for i in 1:ins.nTerm if sum(nx[i, :]) > 0]
+  terms = [i for i in 1:ins.nTerm if isconnected(nx[i, :])]
   # find all terminals that are closer to j1 than to their farthest assigned
   # lvl1 concentrator
   for i in terms
@@ -173,10 +173,10 @@ function openLvl1(ins::Instance, sol::Solution, j1::Int64)
     nx[i, j] = 0
     #check if terminal i was the last terminal assigned to j, if so then
     #close the lvl2 concentrators connected to j
-    if sum(nx[:, j]) == 0
+    if !isconnected(nx[:, j])
       for k in 1:ins.nLvl2
         ny[j, k] = 0
-        if sum(ny[:, k]) == 0
+        if !isconnected(ny[:, k])
           nz[k] = 0
         end
       end

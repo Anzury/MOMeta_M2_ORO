@@ -1,69 +1,65 @@
-include("model.jl")
-include("plots.jl")
-include("grasp.jl")
-include("tabu.jl")
+using CSV
 
-function solveAll(path::String, savepath::String=""; verbose=false, timeout=typemax(Int64), unique=false)
-  for file in readdir(path)
-    if file[1] == '.'
-      continue
+include("scattersearch.jl")
+
+# Run Scatter Search numIter times and return the average solving time and the average number of solutions
+# in YPN. Store the results in a CSV file.
+function runScatterSearch(numIter::Int64, path::String, savepath::String="", popSize::Int64=10; α::Float64=0.7,
+                       p::Float64=0.4, TL::Int64=7, kp::Float64=0.4, verboseLevel=0, unique=false,
+                       timeout=typemax(Int64), exact=true)
+  if verboseLevel > 0
+    println("Scatter Search Battery test")
+    println("popSize = "*string(popSize))
+    println("α = "*string(α))
+    println("p = "*string(p))
+    println("TL = "*string(TL))
+    println("kp = "*string(kp))
+    println("verbose level = ", verboseLevel)
+    println("unique = "*string(unique))
+    println("timeout = "*string(timeout)*"s")
+    println("exact = "*string(exact))
+    println("\n")
+  end
+  results = Dict{String, Tuple{Vector{Float64}, Int64}}()
+  for i=1:numIter
+    if verboseLevel > 0
+      println("Iteration "*string(i))
     end
-    insname = getInstanceName(file)
-    println("Solving "*insname*"...")
-    solSet = solveExact(path*file, verbose=verbose, timeout=timeout, unique=unique)
+    r = ScatterSearch(path, savepath, popSize, α=α, p=p, TL=TL, kp=kp, verboseLevel=-verboseLevel, unique=unique,
+                      timeout=timeout, exact=exact)
 
-    if solSet.result_count > 0
-      plotYN(solSet)
-      savefig(savepath*"/exact/YN/"*insname*".png")
-      display(plotSolution(solSet))
-      savefig(savepath*"/exact/map/"*insname*".png")
-      plotAllSolution(solSet)
-      savefig(savepath*"/exact/map/all_"*insname*".png")
+    for (k, v) in r
+      if haskey(results, k)
+        results[k] = (results[k][1] + v[1], results[k][2] + v[2])
+      else
+        results[k] = v
+      end
     end
   end
-end
 
-function testTabu(path::String, savepath::String="", popSize::Int64=10, α::Float64=0.7, TL=7)
-  for file in readdir(path)
-    if file[1] == '.'
-      continue
-    end
-    insname = getInstanceName(file)
-    println("Solving "*insname*"...")
-
-    ins, initPop = createPopulationGRASP(path*file, popSize, α=α)
-    initZ1, initZ2 = [], []
-    for sol in initPop
-      push!(initZ1, sol.z1)
-      push!(initZ2, sol.z2)
-    end
-    plotYN(initZ1, initZ2, lb="GRASP", ms=:+)
-
-    YPN = initSkipList()
-    imprZ1, imprZ2 = [], []
-    _, solutions = tabuImprovement(ins, initPop, TL=TL, k=0.4*ins.nLvl1)
-    for sol in solutions
-      push!(YPN, Point(sol.z1, sol.z2))
-      push!(imprZ1, sol.z1)
-      push!(imprZ2, sol.z2)
-    end
-
-    solSet = SolutionSet(ins, length(YPN), YPN, solutions)
-    solSetExact = solveExact(path*file, verbose=false)
-
-    plotYN!(imprZ1, imprZ2, lb="Tabu", ms=:x)
-    savefig(savepath*"/tabu/obj/"*insname*".png")
-    plotYN(solSet, lb=L"Y_{PN}", ms=:x)
-    plotYN!(solSetExact)
-    savefig(savepath*"/tabu/YN/"*insname*".png")
-    display(plotSolution(solSet))
-    savefig(savepath*"/tabu/map/"*insname*".png")
-    plotAllSolution(solSet)
-    savefig(savepath*"/tabu/map/all_"*insname*".png")
+  for (k, v) in results
+    results[k] = (v[1]/numIter, v[2]/numIter)
   end
+
+  instances, tGRASP, tTS, tPR, tEX, nSol = [], [], [], [], [], []
+  for (k, v) in results
+    push!(instances, k)
+    push!(tGRASP, v[1][1])
+    push!(tTS, v[1][2])
+    push!(tPR, v[1][3])
+    push!(tEX, v[1][4])
+    push!(nSol, v[2])
+  end
+  results = DataFrame(instance=instances, tGRASP=tGRASP, tTS=tTS, tPR=tPR, tEX=tEX, nSol=nSol)
+  CSV.write(savepath*"results.csv", results)
+
+  return results
 end
 
 # solveAll("instances/txt/", "results/txt/")
 # solveAll("instances/geojson/", "results/geojson/")
 
-testTabu("instances/txt/", "results/txt/", 100, 0.7, 12)
+# ScatterSearch("instances/txt/", "results/txt/", 200, α=0.7, verboseLevel=1)
+# ScatterSearch("instances/geojson/", "results/geojson/", 100, α=0.7, exact=false, verboseLevel=1)
+
+runScatterSearch(1, "instances/txt/", "results/txt/", 200, α=0.7, verboseLevel=1)

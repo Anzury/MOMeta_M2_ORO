@@ -198,3 +198,13 @@ end
 function getZ2(ins::Instance, x::Array{Int64, 2})
   return maximum([x[i,j]*ins.C[i,j] for i in 1:ins.nTerm, j in 1:ins.nLvl1]) + 0.0
 end
+
+# utility function used to know if there is a non-null value in the vector
+function isconnected(v::Array{Int64, 1})
+  for i in v
+    if i != 0
+      return true
+    end
+  end
+  return false
+end

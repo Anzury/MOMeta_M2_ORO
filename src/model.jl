@@ -3,6 +3,7 @@ import HiGHS, Gurobi
 import MultiObjectiveAlgorithms as MOA
 
 include("parser.jl")
+include("plots.jl")
 
 function getModelTSUFLP(ins::Instance; solver=Gurobi.Optimizer, timeout=typemax(Int64), unique=false)
   # Model definition (w/ algorithm used)
@@ -91,3 +92,24 @@ function solveExact(path::String; solver=Gurobi.Optimizer, verbose=true, timeout
 
   return SolutionSet(instance, R, YN, solutions)
 end
+
+function solveAll(path::String, savepath::String=""; verbose=false, timeout=typemax(Int64), unique=false)
+  for file in readdir(path)
+    if file[1] == '.'
+      continue
+    end
+    insname = getInstanceName(file)
+    println("Solving "*insname*"...")
+    solSet = solveExact(path*file, verbose=verbose, timeout=timeout, unique=unique)
+
+    if solSet.result_count > 0
+      plotYN(solSet)
+      savefig(savepath*"/YN_"*insname*".png")
+      display(plotSolution(solSet))
+      savefig(savepath*"/map_"*insname*".png")
+      plotAllSolution(solSet)
+      savefig(savepath*"/allmap_"*insname*".png")
+    end
+  end
+end
+

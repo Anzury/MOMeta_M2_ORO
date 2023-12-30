@@ -17,7 +17,7 @@ function tabu(ins::Instance, sol::Solution; TL=7, k=4, firstobj=true, move=swap,
 
   while noimprovementcounter < k
     found_improvement = false
-    moves = getMoves(ins, sol, TM, TL, bestValue, firstobj=firstobj)
+    moves = getMoves(ins, sol, TM, bestValue, firstobj=firstobj)
 
     # swap move
     new_sol = move(ins, sol, moves[2:end]...)
