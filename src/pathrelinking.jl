@@ -9,6 +9,11 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
   sort!(S1, by = x -> x.z1)
   sort!(S2, by = x -> x.z2)
 
+  for i=1:10
+    push!(S1, pop[rand(1:halfpop)])
+    push!(S2, pop[rand(halfpop:end)])
+  end
+
   solutions = []
   YPN = initSkipList()
 

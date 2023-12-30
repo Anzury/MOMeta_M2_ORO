@@ -20,7 +20,7 @@ function runScatterSearch(numIter::Int64, path::String, savepath::String="", pop
     println("exact = "*string(exact))
     println("\n")
   end
-  results = Dict{String, Tuple{Vector{Float64}, Int64}}()
+  results = Dict{String, Tuple{Vector{Float64}, Float64, Float64, Float64}}()
   for i=1:numIter
     if verboseLevel > 0
       println("Iteration "*string(i))
@@ -30,7 +30,7 @@ function runScatterSearch(numIter::Int64, path::String, savepath::String="", pop
 
     for (k, v) in r
       if haskey(results, k)
-        results[k] = (results[k][1] + v[1], results[k][2] + v[2])
+        results[k] = (results[k][1] + v[1], results[k][2] + v[2], results[k][3] + v[3], results[k][4] + v[4])
       else
         results[k] = v
       end
@@ -38,19 +38,23 @@ function runScatterSearch(numIter::Int64, path::String, savepath::String="", pop
   end
 
   for (k, v) in results
-    results[k] = (v[1]/numIter, v[2]/numIter)
+    results[k] = (v[1]/numIter, v[2]/numIter, v[3]/numIter, v[4]/numIter)
   end
 
-  instances, tGRASP, tTS, tPR, tEX, nSol = [], [], [], [], [], []
+  # sort results in lexicographic order of the instane name
+  results = sort(collect(results), by = x -> x[1])
+  instances, tGRASP, tTS, tPR, tEX, nSol, Q, D = [], [], [], [], [], [], [], []
   for (k, v) in results
     push!(instances, k)
-    push!(tGRASP, v[1][1])
-    push!(tTS, v[1][2])
-    push!(tPR, v[1][3])
-    push!(tEX, v[1][4])
-    push!(nSol, v[2])
+    push!(tGRASP, round(v[1][1], digits=3))
+    push!(tTS, round(v[1][2], digits=3))
+    push!(tPR, round(v[1][3], digits=3))
+    push!(tEX, round(v[1][4], digits=3))
+    push!(nSol, round(v[2], digits=3))
+    push!(Q, round(v[3], digits=3))
+    push!(D, round(v[4], digits=3))
   end
-  results = DataFrame(instance=instances, tGRASP=tGRASP, tTS=tTS, tPR=tPR, tEX=tEX, nSol=nSol)
+  results = DataFrame(instance=instances, tGRASP=tGRASP, tTS=tTS, tPR=tPR, tEX=tEX, nSol=nSol, Q=Q, D=D)
   CSV.write(savepath*"results.csv", results)
 
   return results

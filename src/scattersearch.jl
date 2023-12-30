@@ -3,6 +3,7 @@ include("plots.jl")
 include("grasp.jl")
 include("tabu.jl")
 include("pathrelinking.jl")
+include("qualitymeasure.jl")
 
 function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α::Float64=0.7,
                        p::Float64=0.4, TL::Int64=7, kp::Float64=0.4, verboseLevel::Int64=0,
@@ -32,7 +33,7 @@ function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α:
     mkdir(savepath*"/obj")
   end
 
-  results = Dict{String, Tuple{Vector{Float64}, Int64}}()
+  results = Dict{String, Tuple{Vector{Float64}, Float64, Float64, Float64}}()
   for file in readdir(path)
     if file[1] == '.'
       continue
@@ -82,13 +83,18 @@ function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α:
     if verbose && exact
       println("Solving exact...")
     end
-    solSetExact = nothing
+    solSetExact, Q, D = nothing, -1, -1
     if exact
       push!(instime, @elapsed solSetExact = solveExact(path*file, verbose=verbose2, timeout=timeout, unique=unique)) # ***
+      areaYPN = computeArea(solSetExact.YN, YPN)
+      areaexact = computeAreaExact(solSetExact.YN, YPN)
+      Q = areaexact != 0 ? areaYPN/areaexact : -0
+      Q = isnan(Q) ? -0 : Q*100
+      D = computeIdealsDistance(solSetExact.YN, YPN)
     else
       push!(instime, -1.0)
     end
-    results[insname] = (instime, length(YPN))
+    results[insname] = (instime, length(YPN)+0.0, Q, D)
 
     plotYN!(imprZ1, imprZ2, lb="Tabu", ms=:x)
     plotYN!(combiZ1, combiZ2, lb="Path relinking", ms=:star4)
