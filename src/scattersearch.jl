@@ -107,7 +107,6 @@ function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α:
     savefig(savepath*"/map/all_"*insname*".png")
 
     println("----------------------------------\n")
-    break
   end
 
   return results

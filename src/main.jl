@@ -62,4 +62,4 @@ end
 # ScatterSearch("instances/txt/", "results/txt/", 200, α=0.7, verboseLevel=1)
 # ScatterSearch("instances/geojson/", "results/geojson/", 100, α=0.7, exact=false, verboseLevel=1)
 
-runScatterSearch(1, "instances/txt/", "results/txt/", 200, α=0.7, verboseLevel=1)
+runScatterSearch(10, "instances/txt/", "results/txt/", 200, α=0.7, verboseLevel=1)
