@@ -2,7 +2,11 @@ include("moves.jl")
 
 # Tabu method : returns an improved solution w.r.t to sol, uses
 # a parameter TL for the size of the memory (Tenure) and k 
-# representing the maximum number of iterations without improvement
+# representing the maximum number of iterations without improvement.
+# The parameter firstobj is true if we want to minimize the first objective
+# function, false otherwise.
+# The parameter move is the move to use (swap, shift, drop, openLvl1)
+# The parameter getMoves is the function to use to get the non tabu moves
 function tabu(ins::Instance, sol::Solution; TL=7, k=4, firstobj=true, move=swap, getMoves=getNonTabuSwapMoves)
   bestValue = firstobj ? getZ1(ins, sol.x, sol.y, sol.z) : getZ2(ins, sol.x)
   bestx = copy(sol.x)
@@ -53,6 +57,11 @@ function tabu(ins::Instance, sol::Solution; TL=7, k=4, firstobj=true, move=swap,
 end
 
 # Improve a population of solutions using tabu search
+# The parameters are :
+#  - ins: the instance
+#  - pop: the population to improve
+#  - TL: tabu list size
+#  - k: maximum number of iterations without improvement
 function tabuImprovement(ins::Instance, pop::Vector{Solution}; TL=7, k=4)
   halfpop = Int(ceil(length(pop)/2))
   for i in 1:halfpop

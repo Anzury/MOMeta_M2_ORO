@@ -1,5 +1,14 @@
 include("parser.jl")
 
+# Path relinking. Returns the archive YPN and the new solutions.
+# YPN is a skip list containing the objective values of the solutions in the
+# archive.
+# The path relinking is done between the first half of the population and the
+# second half.
+# The first half of the population is sorted by first objective value.
+# The second half of the population is sorted by second objective value.
+# The first solution of the first half is compared to the first solution of the
+# second half for the relinking process.
 function pathrelinking(ins::Instance, pop::Vector{Solution})
   halfpop = Int(ceil(length(pop)/2))
   S1 = pop[1:halfpop]
@@ -9,6 +18,9 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
   sort!(S1, by = x -> x.z1)
   sort!(S2, by = x -> x.z2)
 
+  # We randomly select 10 solutions from each half of the population
+  # to perform the path relinking on these solutions without taking their
+  # objective values into account.
   for i=1:10
     push!(S1, pop[rand(1:halfpop)])
     push!(S2, pop[rand(halfpop:end)])
