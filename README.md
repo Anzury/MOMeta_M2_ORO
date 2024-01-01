@@ -32,7 +32,8 @@ runScatterSearchBattery(4, 5, "instances", "resultats", 200, αmin=0.5, αmax=0.
 ```
 Ces appels de fonction vont lancer le scatter search 5 fois sur chaque instance
 et sauvegarder les résultats dans un fichier CSV. De plus, la fonction `runScatterSearchBattery`
-va lancer le scatter search sur 4 valeurs de `α` et 4 valeurs de `TL` (soit 16 combinaisons).
+va lancer le scatter search sur 4 valeurs de `α` (choisies uniformément entre 0.5 et 0.9) et 4
+valeurs de `TL` (choisies uniformément entre 3 et 14), soit 16 combinaisons.
 
 L'ensemble des paramètres du Scatter Search sont:
 - `path`: chemin vers les instances
