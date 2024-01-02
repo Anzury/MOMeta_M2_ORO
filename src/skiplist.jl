@@ -11,6 +11,7 @@ Tuple{Float64, Float64, Array{Int64, 2}, Array{Int64, 2}, Array{Int64, 1}}(
 const Point = Tuple{Float64, Float64, Array{Int64, 2}, Array{Int64, 2}, Array{Int64, 1}}
 
 Base.isless(a::Point, b::Point) = a < b
+Base.isless(a::Matrix{Int64}, b::Matrix{Int64}) = true
 dom(a::Point, b::Point) = a[1] <= b[1] && a[2] <= b[2] && a != b
 
 # push! method for SkipList :
