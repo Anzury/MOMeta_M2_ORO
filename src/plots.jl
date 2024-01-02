@@ -43,14 +43,14 @@ function plotSolution(s::SolutionSet, r=1)
 
   z = (Int(s.YN[r][1]), Int(s.YN[r][2]))
   p = plot(title=string(z), legend=false, showaxis=false)
-  if isempty(s.solutions)
+  if isempty(s.YN)
     return p
   end
   
   lvl1term = [[], []]
   for i=1:I
     for j=1:J
-      if s.solutions[r].x[i,j] == 1.0
+      if s.YN[r][3][i,j] == 1.0
         for t=1:2
           push!(lvl1term[t], [s.instance.terminals[i,t], s.instance.locationLvl1[j,t]])
         end
@@ -62,7 +62,7 @@ function plotSolution(s::SolutionSet, r=1)
   lvl1lvl2 = [[], []]
   for j=1:J
     for k=1:K
-      if s.solutions[r].y[j,k] == 1.0
+      if s.YN[r][4][j,k] == 1.0
         for t=1:2
           push!(lvl1lvl2[t], [s.instance.locationLvl2[k,t], s.instance.locationLvl1[j,t]])
         end

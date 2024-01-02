@@ -62,14 +62,13 @@ function solveExact(path::String; solver=Gurobi.Optimizer, verbose=true, timeout
   optimize!(model)
 
   R = result_count(model)
-  solutions::Vector{Solution} = []
   YN = initSkipList()
   x = zeros(Int, instance.nTerm, instance.nLvl1)
   y = zeros(Int, instance.nLvl1, instance.nLvl2)
   z = zeros(Int, instance.nLvl2)
   for r=1:R
     z1, z2 = objective_value(model, result=r)
-    push!(YN, Point(z1, z2))
+    push!(YN, Point(z1, z2, x, y, z))
 
     for i=1:instance.nTerm
       for j=1:instance.nLvl1
@@ -82,15 +81,13 @@ function solveExact(path::String; solver=Gurobi.Optimizer, verbose=true, timeout
         end
       end
     end
-
-    push!(solutions, Solution(x, y, z, z1, z2))
   end
 
   if verbose
     solution_summary(model)
   end
 
-  return SolutionSet(instance, R, YN, solutions)
+  return SolutionSet(instance, R, YN)
 end
 
 function solveAll(path::String, savepath::String=""; verbose=false, timeout=typemax(Int64), unique=false)

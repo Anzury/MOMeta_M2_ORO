@@ -13,6 +13,7 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
   halfpop = Int(ceil(length(pop)/2))
   S1 = pop[1:halfpop]
   S2 = pop[halfpop:end]
+  YPN = initSkipList()
 
   # Sort pop by objective value
   sort!(S1, by = x -> x.z1)
@@ -26,16 +27,13 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
     push!(S2, pop[rand(halfpop:end)])
   end
 
-  solutions = []
-  YPN = initSkipList()
-
   for (s1, s2) in zip(S1, S2)
     # s1 is the solution dominating the other one
     if s2.z1 < s1.z1 && s2.z2 < s1.z2
       s1, s2 = s2, s1
     end
-    push!(YPN, (s1.z1, s1.z2))
-    push!(YPN, (s2.z1, s2.z2))
+    push!(YPN, (s1.z1, s1.z2, s1.x, s1.y, s1.z))
+    push!(YPN, (s2.z1, s2.z2, s2.x, s2.y, s2.z))
 
     s1lvl1, s2lvl1 = [], []
     for j=1:ins.nLvl1
@@ -134,8 +132,7 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
         pz1, pz2 = nz1, nz2
         px, py, pz = copy(nx), copy(ny), copy(nz)
 
-        push!(solutions, Solution(nx, ny, nz, nz1, nz2))
-        push!(YPN, (nz1, nz2))
+        push!(YPN, (nz1, nz2, nx, ny, nz))
       else
         nx, ny, nz = copy(px), copy(py), copy(pz)
         nz1, nz2 = pz1, pz2
@@ -144,5 +141,5 @@ function pathrelinking(ins::Instance, pop::Vector{Solution})
     end
   end
 
-  return YPN, solutions
+  return YPN
 end

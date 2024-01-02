@@ -28,7 +28,6 @@ mutable struct SolutionSet
   instance::Instance
   result_count::Int64
   YN::Vector{Point}
-  solutions::Vector{Solution}
 end
 
 function getInstanceName(fname::String)

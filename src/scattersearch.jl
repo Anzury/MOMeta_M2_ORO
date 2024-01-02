@@ -86,17 +86,12 @@ function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α:
       println("Path relinking...")
     end
     combiZ1, combiZ2 = [], []
-    push!(instime, @elapsed YPN, combiPop = pathrelinking(ins, imprPop)) # ***
-    for sol in combiPop
-      push!(combiZ1, sol.z1)
-      push!(combiZ2, sol.z2)
+    push!(instime, @elapsed YPN = pathrelinking(ins, imprPop)) # ***
+    for sol in YPN
+      push!(combiZ1, sol[1])
+      push!(combiZ2, sol[2])
     end
-    finalPop = [imprPop; combiPop]
-    # remove all solutions whose objective values are not in YPN
-    finalPop = filter(sol -> (sol.z1, sol.z2) in YPN, finalPop)
-    # order finalPop as in YPN
-    finalPop = sort!(finalPop, by = x -> (x.z1, x.z2))
-    solSet = SolutionSet(ins, length(YPN), YPN, finalPop)
+    solSet = SolutionSet(ins, length(YPN), YPN)
 
     if verbose && exact
       println("Solving exact...")
@@ -131,10 +126,14 @@ function ScatterSearch(path::String, savepath::String="", popSize::Int64=10; α:
       plotYN!(solSetExact)
     end
     savefig(savepath*"/YN/"*insname*".png")
+    display(plotSolution(solSetExact))
+    savefig(savepath*"/map/"*insname*"_exact.png")
+    plotAllSolution(solSetExact)
+    savefig(savepath*"/map/all_"*insname*"_exact.png")
     display(plotSolution(solSet))
-    savefig(savepath*"/map/"*insname*".png")
+    savefig(savepath*"/map/"*insname*"_SS.png")
     plotAllSolution(solSet)
-    savefig(savepath*"/map/all_"*insname*".png")
+    savefig(savepath*"/map/all_"*insname*"_SS.png")
 
     println("----------------------------------\n")
     iter += 1
