@@ -10,14 +10,8 @@ Tuple{Float64, Float64, Array{Int64, 2}, Array{Int64, 2}, Array{Int64, 1}}(
 
 const Point = Tuple{Float64, Float64, Array{Int64, 2}, Array{Int64, 2}, Array{Int64, 1}}
 
-Base.:>(a::Point, b::Point) = (a[1], a[2]) > (b[1], b[2])
-Base.:<(a::Point, b::Point) = (a[1], a[2]) < (b[1], b[2])
-Base.:(>=)(a::Point, b::Point) = (a[1], a[2]) >= (b[1], b[2])
-Base.:(<=)(a::Point, b::Point) = (a[1], a[2]) <= (b[1], b[2])
-Base.:(==)(a::Point, b::Point) = (a[1], a[2]) == (b[1], b[2])
-Base.:(!=)(a::Point, b::Point) = (a[1], a[2]) != (b[1], b[2])
-Base.isless(a::Point, b::Point) = (a[1], a[2]) < (b[1], b[2])
-dom(a::Point, b::Point) = a[1] <= b[1] && a[2] <= b[2] && a[1] != b[1] && a[2] != b[2]
+Base.isless(a::Point, b::Point) = a < b
+dom(a::Point, b::Point) = a[1] <= b[1] && a[2] <= b[2] && a != b
 
 # push! method for SkipList :
 # if p is not in s and it is not dominated by any point in s, then we add p to s
